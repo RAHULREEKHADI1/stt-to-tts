@@ -13,7 +13,7 @@ def create_app():
     load_config(app)
     CORS(
         app,
-        resources={r"/api/*": {"origins": "https://stt-to-tts.vercel.app/"}},
+        resources={r"/api/*": {"origins": "https://stt-to-66bzy7qy8-rahulreekhadi1s-projects.vercel.app/"}},
         supports_credentials=True,    
         methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],     
         allow_headers=["Content-Type", "Authorization"]
