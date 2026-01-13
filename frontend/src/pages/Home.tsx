@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import TaskList from "../components/TaskList";
 import VoiceButton from "../components/VoiceButton";
-import { LayoutDashboard, Calendar, Settings } from "lucide-react";
+import { LayoutDashboard } from "lucide-react";
 
 const Home: React.FC = () => {
   const [refresh, setRefresh] = useState(false);
@@ -17,13 +17,6 @@ const Home: React.FC = () => {
           <span className="text-xl font-bold bg-clip-text text-transparent bg-linear-to-r from-indigo-600 to-purple-600">
             VoiceTask AI
           </span>
-        </div>
-        <div className="flex items-center gap-4 text-gray-500">
-          <Calendar className="w-5 h-5 cursor-pointer hover:text-indigo-600 transition-colors" />
-          <Settings className="w-5 h-5 cursor-pointer hover:text-indigo-600 transition-colors" />
-          <div className="w-8 h-8 bg-indigo-100 rounded-full border border-indigo-200 flex items-center justify-center text-indigo-700 font-bold text-xs">
-            JD
-          </div>
         </div>
       </nav>
 
