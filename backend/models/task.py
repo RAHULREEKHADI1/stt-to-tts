@@ -45,7 +45,6 @@ def delete_task_by_number(user_id, task_number):
     if result.deleted_count == 0:
         raise Exception("Task not found")
 
-    # reindex numbers
     db.tasks.update_many(
         {
             "user_id": ObjectId(user_id),

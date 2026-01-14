@@ -8,6 +8,11 @@ import ProtectedRoute from "./components/ProtectedRoute";
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(!!localStorage.getItem("token"));
 
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    setIsLoggedIn(false);
+  };
+
   return (
     <Router>
       <Routes>
@@ -16,7 +21,7 @@ function App() {
         } />
         <Route path="/home" element={
           <ProtectedRoute>
-            <Home />
+            <Home onLogout={handleLogout} />
           </ProtectedRoute>
         } />
         <Route path="*" element={<Navigate to="/" />} />

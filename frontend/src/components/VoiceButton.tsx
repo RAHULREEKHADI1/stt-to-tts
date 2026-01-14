@@ -41,32 +41,53 @@ const VoiceButton: React.FC<Props> = ({ onTaskUpdated }) => {
   };
 
   const uploadAudio = async (file: File) => {
-    setIsProcessing(true);
-    const formData = new FormData();
-    formData.append("audio", file);
+  setIsProcessing(true);
+  setError(null);
 
-    try {
-      const res = await API.post<VoiceResponse>("/voice/upload", formData);
-      const { audio_url } = res.data;
+  const formData = new FormData();
+  formData.append("audio", file);
 
-      if (audio_url) {
-        const rawBackend = import.meta.env.VITE_BACKEND_URL;
-        const backendBase = rawBackend.replace(/\/api\/?$/, "");
-        const normalized = audio_url.startsWith("/") ? audio_url.replace(/^\/+/, "") : audio_url;
-        const finalUrl = audio_url.startsWith("http") ? audio_url : `${backendBase}/${normalized}`;
-        
-        const audio = new Audio(finalUrl);
-        audio.play();
-      }
+  try {
+    const res = await API.post<VoiceResponse>("/voice/upload", formData);
+    const { audio_url } = res.data;
 
-      onTaskUpdated();
-    } catch (err) {
-      setError("Upload failed. Please try again.");
-      console.error(err);
-    } finally {
-      setIsProcessing(false);
+    if (audio_url) {
+      const rawBackend = import.meta.env.VITE_BACKEND_URL;
+      const backendBase = rawBackend.replace(/\/api\/?$/, "");
+
+      const normalized = audio_url.startsWith("/")
+        ? audio_url.replace(/^\/+/, "")
+        : audio_url;
+
+      const finalUrl = audio_url.startsWith("http")
+        ? `${audio_url}?t=${Date.now()}`
+        : `${backendBase}/${normalized}?t=${Date.now()}`;
+
+      await new Promise((resolve) => setTimeout(resolve, 5000));
+
+      const audio = new Audio(finalUrl);
+
+      audio.oncanplaythrough = () => {
+        audio.play().catch(console.error);
+      };
+
+      audio.onerror = () => {
+        setError("Audio failed to load.");
+      };
     }
-  };
+
+    onTaskUpdated();
+  } catch (err: any) {
+    setError(
+      err?.response?.data?.error ||
+      err?.response?.data?.message ||
+      "Upload failed. Please try again."
+    );
+    console.error(err);
+  } finally {
+    setIsProcessing(false);
+  }
+};
 
   return (
     <div className="flex flex-col items-center gap-4 w-full">
@@ -83,7 +104,7 @@ const VoiceButton: React.FC<Props> = ({ onTaskUpdated }) => {
         onClick={() => fileInputRef.current?.click()}
         disabled={isProcessing}
         className={`relative group flex items-center justify-center gap-3 px-8 py-4 rounded-full font-bold text-lg transition-all duration-300 shadow-xl hover:shadow-2xl active:scale-95 disabled:opacity-80 
-          bg-linear-to-r from-indigo-600 to-purple-600 text-white hover:from-indigo-700 hover:to-purple-700`}
+          bg-linear-to-r from-indigo-600 to-purple-600 text-white hover:from-indigo-700 hover:to-purple-700 hover:scale-105`}
       >
         {isProcessing ? (
           <>

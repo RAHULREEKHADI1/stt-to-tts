@@ -60,7 +60,7 @@ const TaskList: React.FC = () => {
           <div className="p-2 bg-indigo-100 rounded-lg">
             <ListTodo className="w-5 h-5 text-indigo-600" />
           </div>
-          <h3 className="text-xl font-bold text-gray-800">Your Tasks</h3>
+          <h3 className="text-xl font-bold text-white">Your Tasks</h3>
         </div>
         <span className="bg-indigo-50 text-indigo-700 text-xs font-bold px-2.5 py-1 rounded-full uppercase tracking-wider">
           {tasks.filter(t => !t.completed).length} Pending
@@ -78,7 +78,7 @@ const TaskList: React.FC = () => {
         {tasks.map((task, index) => (
           <li
             key={task._id || index}
-            className={`group relative flex items-center justify-between p-4 rounded-2xl transition-all duration-300 border ${
+            className={`group relative flex items-center justify-between p-4 rounded-2xl transition-all duration-300 border hover:border-3 hover:scale-105 hover:border-purple-700 ${
               task.completed
                 ? "bg-gray-50/50 border-gray-100 opacity-75"
                 : "bg-white border-gray-200 shadow-sm hover:shadow-md hover:border-indigo-200"

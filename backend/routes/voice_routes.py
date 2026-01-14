@@ -23,15 +23,17 @@ voice_bp = Blueprint("voice", __name__)
 @jwt_required()
 def voice_upload():
     user_id = get_jwt_identity()
-
-    if "audio" not in request.files:
-        return jsonify({"message": "No audio provided"}), 400
-
-    audio_file = request.files["audio"]
-    if audio_file.filename == "":
-        return jsonify({"message": "Empty audio"}), 400
+    user_text = ""
+    response_text = ""
 
     try:
+        if "audio" not in request.files:
+            raise Exception("No audio provided")
+
+        audio_file = request.files["audio"]
+        if audio_file.filename == "":
+            raise Exception("Empty audio")
+
         validate_audio(audio_file)
         raw = save_audio(audio_file)
         wav = convert_to_wav(raw)
@@ -42,7 +44,6 @@ def voice_upload():
         intent = get_intent(user_text)
         response_text = "Sorry, I didn’t understand."
 
-        # -------- NORMALIZE TASK FIELD --------
         task_raw = intent.get("task")
         task_number = None
         task_title = None
@@ -52,7 +53,6 @@ def voice_upload():
         elif isinstance(task_raw, str) and task_raw:
             task_title = task_raw
 
-        # -------- CREATE --------
         if intent["intent"] == "create_task":
             task_id, num = create_task(
                 user_id,
@@ -62,7 +62,6 @@ def voice_upload():
             store_task_embedding(task_id, intent["task"], user_id)
             response_text = f"Task number {num} created."
 
-        # -------- DELETE --------
         elif intent["intent"] == "delete_task":
             if task_number:
                 delete_task_by_number(user_id, task_number)
@@ -73,7 +72,6 @@ def voice_upload():
             else:
                 response_text = "Please specify a task number or title."
 
-        # -------- UPDATE --------
         elif intent["intent"] == "update_task":
             if task_number:
                 update_task_by_number(user_id, task_number, {"completed": True})
@@ -84,7 +82,6 @@ def voice_upload():
             else:
                 response_text = "Please specify a task number or title."
 
-        # -------- LIST --------
         elif intent["intent"] == "list_tasks":
             tasks = get_tasks(user_id)
             if not tasks:
@@ -94,13 +91,13 @@ def voice_upload():
                     [f"{t['task_number']}. {t['title']}" for t in tasks]
                 )
 
-        audio_path = speak(response_text, f"{user_id}.wav")
-
-        return jsonify({
-            "user_text": user_text,
-            "response_text": response_text,
-            "audio_url": audio_path
-        })
-
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        response_text = str(e)
+
+    audio_path = speak(response_text, f"{user_id}.wav")
+
+    return jsonify({
+        "user_text": user_text,
+        "response_text": response_text,
+        "audio_url": audio_path
+    })
