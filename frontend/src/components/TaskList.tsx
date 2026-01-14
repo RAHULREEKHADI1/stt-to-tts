@@ -17,24 +17,35 @@ const TaskList: React.FC = () => {
     try {
       const res = await API.get<Task[]>("/tasks");
       setTasks(Array.isArray(res.data) ? res.data : []);
-    } catch {
+      console.log(tasks);
+
+    } catch (err) {
+      console.error("Failed to fetch tasks", err);
       setTasks([]);
     } finally {
       setLoading(false);
     }
   };
 
-  const markComplete = async (taskId: string) => {
+  const toggleComplete = async (taskId: string) => {
+    console.log(tasks);
+
+    if (!taskId) {
+      console.error("toggleComplete called with undefined taskId", taskId);
+      return;
+    }
     setProcessingId(taskId);
     try {
-      console.log(taskId,"taskId");
-      
-      const res = await API.patch<Task>(`/tasks/${taskId}/update`,{completed:true});
+      console.log(taskId, "ghjk");
+
+      const res = await API.patch<{ completed: boolean }>(`/tasks/${taskId}/toggle`);
       setTasks(prev =>
-        prev.map(task => (task._id === taskId ? res.data : task))
+        prev.map(task =>
+          task._id === taskId ? { ...task, completed: res.data.completed } : task
+        )
       );
     } catch (err) {
-      console.error("Failed to complete task", err);
+      console.error("Failed to toggle task", err);
     } finally {
       setProcessingId(null);
     }
@@ -78,36 +89,37 @@ const TaskList: React.FC = () => {
         {tasks.map((task, index) => (
           <li
             key={task._id || index}
-            className={`group relative flex items-center justify-between p-4 rounded-2xl transition-all duration-300 border hover:border-3 hover:scale-105 hover:border-purple-700 ${
-              task.completed
+            className={`group relative flex items-center justify-between p-4 rounded-2xl transition-all duration-300 border ${task.completed
                 ? "bg-gray-50/50 border-gray-100 opacity-75"
                 : "bg-white border-gray-200 shadow-sm hover:shadow-md hover:border-indigo-200"
-            }`}
+              }`}
           >
-            <div className="flex items-center gap-4">
-              <span className="shrink-0 w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 text-gray-500 text-sm font-bold group-hover:bg-indigo-100 group-hover:text-indigo-600 transition-colors">
+            <div className="flex items-center gap-4 w-[70%]">
+              <span className="shrink-0 w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 text-gray-500 text-sm font-bold">
                 {index + 1}
               </span>
               <span
-                className={`text-base font-medium transition-all ${
-                  task.completed ? "text-gray-400 line-through" : "text-gray-700"
-                }`}
+                className={`text-base font-medium break-words ${task.completed ? "text-gray-400 line-through" : "text-gray-700"
+                  }`}
               >
                 {task.title}
               </span>
             </div>
 
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3 shrink-0">
               {task.completed ? (
-                <div className="flex items-center gap-1.5 text-green-600 bg-green-50 px-3 py-1 rounded-full text-xs font-bold uppercase">
+                <div className="flex w-25 items-center gap-1.5 text-green-600 bg-green-50 px-3 py-1 rounded-full text-xs font-bold uppercase"
+                onClick={()=>toggleComplete(task._id)}>
                   <CheckCircle2 className="w-4 h-4" />
                   Done
                 </div>
               ) : (
                 <button
-                  disabled={processingId === task._id}
-                  onClick={() => markComplete(task._id)}
-                  className="flex items-center gap-2 px-4 py-2 bg-white hover:bg-indigo-600 text-indigo-600 hover:text-white border border-indigo-200 hover:border-indigo-600 rounded-xl text-sm font-bold transition-all disabled:opacity-50"
+                  // disabled={processingId === task._id}
+                  onClick={() => {
+                    toggleComplete(task._id);
+                  }}
+                  className="w-35 flex items-center gap-2 px-4 py-2 bg-white hover:bg-indigo-600 text-indigo-600 hover:text-white border border-indigo-200 hover:border-indigo-600 rounded-xl text-sm font-bold transition-all disabled:opacity-50"
                 >
                   {processingId === task._id ? (
                     <Loader2 className="w-4 h-4 animate-spin" />
