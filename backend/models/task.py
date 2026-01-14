@@ -57,7 +57,7 @@ def delete_task_by_number(user_id, task_number):
 def delete_task_by_title(user_id, title):
     result = db.tasks.delete_one({
         "user_id": ObjectId(user_id),
-        "title": {"$regex": f"^{title}$", "$options": "i"}
+        "title": {"$regex": title, "$options": "i"}
     })
 
     if result.deleted_count == 0:
@@ -81,7 +81,7 @@ def update_task_by_title(user_id, title, data):
     result = db.tasks.update_one(
         {
             "user_id": ObjectId(user_id),
-            "title": {"$regex": f"^{title}$", "$options": "i"}
+            "title": {"$regex": title, "$options": "i"}
         },
         {"$set": data}
     )
