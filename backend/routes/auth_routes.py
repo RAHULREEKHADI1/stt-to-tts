@@ -8,7 +8,17 @@ auth_bp = Blueprint("auth", __name__)
 @auth_bp.route("/signup", methods=["POST"])
 def signup():
     data = request.json
-    create_user(data["email"], data["password"])
+    email = data.get("email")
+    password = data.get("password")
+
+    if not email or not password:
+        return jsonify({"error": "Email and password required"}), 400
+
+    existing_user = find_user(email)
+    if existing_user:
+        return jsonify({"error": "User already exists"}), 409
+
+    create_user(email, password)
     return jsonify({"msg": "User created"}), 201
 
 @auth_bp.route("/login", methods=["POST"])
