@@ -15,7 +15,7 @@ def create_app():
         app,
         resources={r"/api/*": {"origins": "http://116.202.210.102:5174"}},
         supports_credentials=True,    
-        methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],     
+        methods=["GET", "POST", "PUT", "DELETE", "OPTIONS","PATCH"],     
         allow_headers=["Content-Type", "Authorization"]
     )
 

@@ -88,3 +88,27 @@ def update_task_by_title(user_id, title, data):
 
     if result.matched_count == 0:
         raise Exception("Task not found")
+
+def get_tasks_by_due_date(user_id, due_date):
+    return list(db.tasks.find({
+        "user_id": ObjectId(user_id),
+        "due_date": due_date
+    }))
+
+def toggle_task_completed_by_id(user_id: str, task_id: str) -> bool:
+    try:
+        task = db.tasks.find_one({
+            "_id": ObjectId(task_id),
+            "user_id": ObjectId(user_id)
+        })
+        if not task:
+            return False
+
+        new_status = not task.get("completed", False)
+        result = db.tasks.update_one(
+            {"_id": ObjectId(task_id)},
+            {"$set": {"completed": new_status}}
+        )
+        return result.modified_count == 1
+    except:
+        return False

@@ -91,7 +91,19 @@ def voice_upload():
             deleted = 0
             deleted_items = []
             tasks_field = intent.get("tasks")
-            if tasks_field == "all":
+            due_date = intent.get("due_date")
+
+            if due_date:
+                tasks = list(db.tasks.find({
+                    "user_id": ObjectId(user_id),
+                    "due_date": due_date
+                }))
+                for t in tasks:
+                    delete_task_by_number(user_id, t["task_number"])
+                    deleted_items.append(t["task_number"])
+                    deleted += 1
+                response_text = f"All {due_date.replace('_', ' ')} tasks deleted." if deleted else "No matching tasks found."
+            elif tasks_field == "all":
                 tasks = get_tasks(user_id)
                 deleted_items = [t["task_number"] for t in tasks]
                 db.tasks.delete_many({"user_id": ObjectId(user_id)})
@@ -119,10 +131,30 @@ def voice_upload():
         elif intent["intent"] == "update_task":
             updated_count = 0
             action = intent.get("action", "complete")
+            due_date = intent.get("due_date")
             completed_value = True if action == "complete" else False
             tasks_field = intent.get("tasks")
             task = intent.get("task")
-            if tasks_field == "all":
+
+            if due_date:
+                tasks = list(db.tasks.find({
+                    "user_id": ObjectId(user_id),
+                    "due_date": due_date
+                }))
+                for t in tasks:
+                    update_task_by_number(
+                        user_id,
+                        t["task_number"],
+                        {"completed": completed_value}
+                    )
+                    updated_items.append(t["task_number"])
+                    updated_count += 1
+                response_text = (
+                    f"All {due_date.replace('_', ' ')} tasks marked as completed."
+                    if completed_value else
+                    f"All {due_date.replace('_', ' ')} tasks reopened."
+                ) if updated_count else "No matching tasks found."
+            elif tasks_field == "all":
                 result = db.tasks.update_many({"user_id": ObjectId(user_id)}, {"$set": {"completed": completed_value}})
                 updated_count = result.modified_count
                 updated_items = ["all"]

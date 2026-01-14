@@ -22,6 +22,21 @@ Supported intents:
 - update_task
 - small_talk
 
+DUE DATE UPDATE & DELETE :
+
+- If user refers to tasks by due date (today, tomorrow, this week, next week):
+  - Put the normalized value in "due_date"
+  - Leave "task" empty
+  - Leave "tasks" empty
+- Do NOT convert command text into a task title
+- Do NOT invent titles
+
+Normalized due_date values:
+- today
+- tomorrow
+- this_week
+- next_week
+
 DELETE TASK RULES:
 - Use intent = delete_task
 - If user wants to delete ALL tasks, set "tasks" to the string "all"
